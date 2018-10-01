@@ -57,6 +57,7 @@ def getCenters(correlArr: np.ndarray, threshold: float, unscaleFactor: float) ->
     return output
 
 
+# draws a box on drawable from topLeft to bottomRight
 def drawBox(drawable: ImageDraw, topLeft: tuple, bottomRight: tuple, lineWidth: int) -> None:
     # print("drawing on: ", topLeft, " to ", bottomRight)
     xl, yt = topLeft
@@ -79,9 +80,9 @@ def FindTemplate(pyramid: list, template: Image, threshold: float) -> Image:
 
     for i, img in enumerate(pyramid):
         numpy2dArray = ncc.normxcorr2D(img, template)
-        unscaleFactor = (1 / scaleFactor) ** i
-        bound = int(unscaleFactor * template.size[0])
-        centers = getCenters(numpy2dArray, threshold, unscaleFactor)
+        upscaleFactor = (1 / scaleFactor) ** i
+        bound = int(upscaleFactor * template.size[0])
+        centers = getCenters(numpy2dArray, threshold, upscaleFactor)
         for (x, y) in centers:
             topLeft = (max(x - bound, 0), max(y - bound, 0))
             bottomRight = (min(x + bound, width - 1), min(y + bound, height - 1))
@@ -96,19 +97,25 @@ def demoFindTemplate() -> None:
     template = Image.open("faces/template.jpg")
 
     # family = FindTemplate(MakePyramid(Image.open("faces/family.jpg"), (75, 75)), template, 0.6)
-    # family.show()
+    family = FindTemplate(MakePyramid(Image.open("faces/family.jpg"), (75, 75)), template, threshold)
+    family.show()
 
     # fans = FindTemplate(MakePyramid(Image.open("faces/fans.jpg"), (75, 75)), template, 0.62)
-    # fans.show()
+    fans = FindTemplate(MakePyramid(Image.open("faces/fans.jpg"), (75, 75)), template, threshold)
+    fans.show()
 
     # judy = FindTemplate(MakePyramid(Image.open("faces/judybats.jpg"), (75, 75)), template, 0.7)
-    # judy.show()
+    judy = FindTemplate(MakePyramid(Image.open("faces/judybats.jpg"), (75, 75)), template, threshold)
+    judy.show()
 
     # sports = FindTemplate(MakePyramid(Image.open("faces/sports.jpg"), (75, 75)), template, 0.52)
-    # sports.show()
+    sports = FindTemplate(MakePyramid(Image.open("faces/sports.jpg"), (75, 75)), template, threshold)
+    sports.show()
 
     # students = FindTemplate(MakePyramid(Image.open("faces/students.jpg"), (75, 75)), template, 0.7)
-    # students.show()
+    students = FindTemplate(MakePyramid(Image.open("faces/students.jpg"), (75, 75)), template, threshold)
+    students.show()
 
-    tree = FindTemplate(MakePyramid(Image.open("faces/tree.jpg"), (75, 75)), template, 0.7)
+    # tree = FindTemplate(MakePyramid(Image.open("faces/tree.jpg"), (75, 75)), template, 0.7)
+    tree = FindTemplate(MakePyramid(Image.open("faces/tree.jpg"), (75, 75)), template, threshold)
     tree.show()
