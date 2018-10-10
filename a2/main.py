@@ -93,7 +93,7 @@ def FindTemplate(pyramid: list, template: Image, threshold: float) -> Image:
 
 # demos the images
 def demoFindTemplate() -> None:
-    threshold = 0.6
+    threshold = 0.586
     template = Image.open("faces/template.jpg")
 
     # family = FindTemplate(MakePyramid(Image.open("faces/family.jpg"), (75, 75)), template, 0.6)
@@ -116,6 +116,6 @@ def demoFindTemplate() -> None:
     students = FindTemplate(MakePyramid(Image.open("faces/students.jpg"), (75, 75)), template, threshold)
     students.show()
 
-    # tree = FindTemplate(MakePyramid(Image.open("faces/tree.jpg"), (75, 75)), template, 0.7)
+    # # tree = FindTemplate(MakePyramid(Image.open("faces/tree.jpg"), (75, 75)), template, 0.7)
     tree = FindTemplate(MakePyramid(Image.open("faces/tree.jpg"), (75, 75)), template, threshold)
     tree.show()
