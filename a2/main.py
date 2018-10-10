@@ -38,7 +38,7 @@ def ShowPyramid(pyramid: list) -> None:
     image.show()
 
 
-# displays the judybats example
+# displays the judybats pyramid example
 def demoShowPyramid() -> None:
     img = Image.open("faces/judybats.jpg")
     ShowPyramid(MakePyramid(img, (100, 100)))
@@ -57,7 +57,7 @@ def getCenters(correlArr: np.ndarray, threshold: float, unscaleFactor: float) ->
     return output
 
 
-# draws a box on drawable from topLeft to bottomRight
+# draws a red box on drawable from topLeft to bottomRight
 def drawBox(drawable: ImageDraw, topLeft: tuple, bottomRight: tuple, lineWidth: int) -> None:
     # print("drawing on: ", topLeft, " to ", bottomRight)
     xl, yt = topLeft
@@ -68,7 +68,7 @@ def drawBox(drawable: ImageDraw, topLeft: tuple, bottomRight: tuple, lineWidth: 
     drawable.line((xr, yt, xr, yb), fill="red", width=lineWidth)  # right
 
 
-# marks faces with red boxes
+# marks detected faces with red boxes and returns the final full sized image
 def FindTemplate(pyramid: list, template: Image, threshold: float) -> Image:
     assert (len(pyramid) > 0)
     templateWidth = 15
@@ -91,7 +91,7 @@ def FindTemplate(pyramid: list, template: Image, threshold: float) -> Image:
     return finalImg
 
 
-# demos the images
+# demos the images with red boxes over the faces detected
 def demoFindTemplate() -> None:
     threshold = 0.586
     template = Image.open("faces/template.jpg")
