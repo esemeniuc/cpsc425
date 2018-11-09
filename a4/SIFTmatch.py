@@ -1,3 +1,5 @@
+import random
+
 from PIL import Image, ImageDraw
 import numpy as np
 import csv
@@ -85,7 +87,23 @@ def DisplayMatches(im1, im2, matched_pairs):
     return im3
 
 
-def match(image1: str, image2: str) -> Image:
+# keypoint (row, column, scale, orientation).  The orientation
+# is in the range [-PI, PI1] radians.
+def isConsistent(match1: list, match2: list) -> bool:
+    thresOrient = math.pi / 6
+    thresScale = 0.5
+
+    dOrient1 = match1[0][3] - match1[1][3]
+    dScale1 = match1[0][2] - match1[1][2]
+
+    dOrient2 = match2[0][3] - match2[1][3]
+    dScale2 = match2[0][2] - match2[1][2]
+
+    return (dOrient2 - thresOrient <= dOrient1 <= dOrient2 + thresOrient) and (
+            thresScale * dScale2 <= dScale1 <= (1 / thresScale) * dScale2)
+
+
+def match(image1: Image, image2: Image) -> Image:
     """Input two images and their associated SIFT keypoints.
     Display lines connecting the first 5 keypoints from each image.
     Note: These 5 are not correct matches, just randomly chosen points.
@@ -98,20 +116,46 @@ def match(image1: str, image2: str) -> Image:
     """
     im1, keypoints1, descriptors1 = ReadKeys(image1)
     im2, keypoints2, descriptors2 = ReadKeys(image2)
-    #
-    # REPLACE THIS CODE WITH YOUR SOLUTION (ASSIGNMENT 5, QUESTION 3)
-    #
-    # Generate five random matches (for testing purposes)
+
     matched_pairs = []
-    num = 5
-    for i in range(num):
-        matched_pairs.append([keypoints1[i], keypoints2[i]])
-    #
-    # END OF SECTION OF CODE TO REPLACE
-    #
-    im3 = DisplayMatches(im1, im2, matched_pairs)
+
+    # descriptors: a K-by-128 array, where each row gives a descriptor
+    # for one of the K keypoints.  The descriptor is a 1D array of 128
+    # values with unit length.
+
+    if len(descriptors2) < 1:
+        print("NEED DESCRIPTORS")
+        return
+
+    threshold = 0.7
+
+    mat = np.arccos(np.dot(descriptors1, np.transpose(descriptors2)))
+    for img1Idx, row in enumerate(mat):
+        sortedRowIndexes = np.argsort(row)
+        denom = max(row[sortedRowIndexes[1]], 1E-6)  # avoid division by 0
+        if (row[sortedRowIndexes[0]] / denom) < threshold:
+            matched_pairs.append([keypoints1[img1Idx], keypoints2[sortedRowIndexes[0]]])
+
+    # ransac
+    ransacLargestConsistent = [[]] * 10  # make list of 10 empty lists
+    for i in range(10):
+        randIndex = random.randrange(len(matched_pairs))
+        for elem in matched_pairs:
+            if isConsistent(matched_pairs[randIndex], elem):
+                ransacLargestConsistent[i].append(elem)
+
+    # find largest
+    largestIndex = 0
+    largestSize = 0
+    for i in range(10):
+        currentLength = len(ransacLargestConsistent[i])
+        if currentLength > largestSize:
+            largestSize = currentLength
+            largestIndex = i
+
+    im3 = DisplayMatches(im1, im2, ransacLargestConsistent[largestIndex])
     return im3
 
 
 # Test run...
-match('scene', 'basmati')
+match('library', 'library2')
