@@ -83,27 +83,31 @@ def DisplayMatches(im1, im2, matched_pairs):
     draw = ImageDraw.Draw(im3)
     for match in matched_pairs:
         draw.line((match[0][1], match[0][0], offset + match[1][1], match[1][0]), fill="red", width=2)
-    im3.show()
+    # im3.show()
     return im3
+
+
+def isInOrientThreshold(theta1: float, theta2: float, threshold: float) -> bool:
+    dTheta = ((theta2 - theta1 + (3 * math.pi)) % (2 * math.pi)) - math.pi
+    EPSILON = 1E-6
+    return dTheta >= -(threshold + EPSILON) and dTheta <= (threshold + EPSILON)
 
 
 # keypoint (row, column, scale, orientation).  The orientation
 # is in the range [-PI, PI1] radians.
-def isConsistent(match1: list, match2: list) -> bool:
-    thresOrient = math.pi / 6
-    thresScale = 0.5
-
-    dOrient1 = match1[0][3] - match1[1][3]
+def isConsistent(match1: list, match2: list, thresOrient: float, thresScale: float) -> bool:
+    dOrient1 = (match1[0][3] - match1[1][3]) % (2 * math.pi)
     dScale1 = match1[0][2] - match1[1][2]
 
-    dOrient2 = match2[0][3] - match2[1][3]
+    dOrient2 = (match2[0][3] - match2[1][3]) % (2 * math.pi)
     dScale2 = match2[0][2] - match2[1][2]
 
-    return (dOrient2 - thresOrient <= dOrient1 <= dOrient2 + thresOrient) and (
+    return isInOrientThreshold(dOrient1, dOrient2, thresOrient) and (
             thresScale * dScale2 <= dScale1 <= (1 / thresScale) * dScale2)
 
 
-def match(image1: Image, image2: Image) -> Image:
+def match(image1: Image, image2: Image, siftThreshold: float, useRansac: bool = True,
+          ransacThresOrient: float = math.pi / 6, ransacThresScale: float = 0.5) -> Image:
     """Input two images and their associated SIFT keypoints.
     Display lines connecting the first 5 keypoints from each image.
     Note: These 5 are not correct matches, just randomly chosen points.
@@ -123,25 +127,22 @@ def match(image1: Image, image2: Image) -> Image:
     # for one of the K keypoints.  The descriptor is a 1D array of 128
     # values with unit length.
 
-    if len(descriptors2) < 1:
-        print("NEED DESCRIPTORS")
-        return
-
-    threshold = 0.7
-
     mat = np.arccos(np.dot(descriptors1, np.transpose(descriptors2)))
     for img1Idx, row in enumerate(mat):
         sortedRowIndexes = np.argsort(row)
         denom = max(row[sortedRowIndexes[1]], 1E-6)  # avoid division by 0
-        if (row[sortedRowIndexes[0]] / denom) < threshold:
+        if (row[sortedRowIndexes[0]] / denom) < siftThreshold:
             matched_pairs.append([keypoints1[img1Idx], keypoints2[sortedRowIndexes[0]]])
+
+    if useRansac is False:
+        return DisplayMatches(im1, im2, matched_pairs)
 
     # ransac
     ransacLargestConsistent = [[]] * 10  # make list of 10 empty lists
     for i in range(10):
         randIndex = random.randrange(len(matched_pairs))
         for elem in matched_pairs:
-            if isConsistent(matched_pairs[randIndex], elem):
+            if isConsistent(matched_pairs[randIndex], elem, ransacThresOrient, ransacThresScale):
                 ransacLargestConsistent[i].append(elem)
 
     # find largest
@@ -157,5 +158,41 @@ def match(image1: Image, image2: Image) -> Image:
     return im3
 
 
+def test():
+    assert (isInOrientThreshold(-0.75 * math.pi, 0.25 * math.pi, math.pi))
+    assert (not isInOrientThreshold(-1 * math.pi, 0.25 * math.pi, math.pi / 2))
+    assert (isInOrientThreshold(-0.5 * math.pi, 0.25 * math.pi, math.pi))
+    assert (isInOrientThreshold(-1 * math.pi, math.pi, math.pi / 8))  # equal
+    assert (isInOrientThreshold(-1 / 6 * math.pi, 1 / 6 * math.pi, math.pi / 3))
+    assert (not isInOrientThreshold(-1 / 6 * math.pi, 1 / 6 * math.pi, math.pi / 4))
+    assert (isInOrientThreshold(11 / 6 * math.pi, -11 / 6 * math.pi, math.pi / 3))
+    assert (isInOrientThreshold(-11 / 6 * math.pi, 1 / 6 * math.pi, math.pi / 3))
+    assert (not isInOrientThreshold(11 / 6 * math.pi, -5 / 6 * math.pi, math.pi / 3))
+    assert (not isInOrientThreshold(11 / 6 * math.pi, -5 / 3 * math.pi, math.pi / 3))
+    assert (isInOrientThreshold(11 / 6 * math.pi, -5 / 3 * math.pi, math.pi))
+
+
 # Test run...
-match('library', 'library2')
+test()
+# siftThresholds = [0.40, 0.60, 0.70, 0.75, 0.78, 0.79, 0.80]
+# for siftThreshold in siftThresholds:
+#     match('scene', 'book', siftThreshold=siftThreshold, useRansac=False).save(
+#         'results/sb_' + ("%0.2f" % siftThreshold) + '_out.png')
+#
+#
+# siftThresholds = [0.78, 0.79, 0.8]
+# ransacOrientThresholds = [math.pi / 4, math.pi / 5, math.pi / 6, math.pi / 7, math.pi / 8]
+# ransacScaleThresholds = [0.4, 0.45, 0.5, 0.55, 0.6]
+# for siftThreshold in siftThresholds:
+#     for ransacOrientThreshold in ransacOrientThresholds:
+#         for ransacScaleThreshold in ransacScaleThresholds:
+#             match('library', 'library2', siftThreshold=siftThreshold, useRansac=True,
+#                   ransacThresOrient=ransacOrientThreshold,
+#                   ransacThresScale=ransacScaleThreshold).save(
+#                 'results/ll_sift-' + ("%0.2f" % siftThreshold) +
+#                 '_orient-' + ("%0.2f" % ransacOrientThreshold) + '_scale-' +
+#                 ("%0.2f" % ransacScaleThreshold) + '_out.png')
+
+match('library', 'library2', siftThreshold=0.8, useRansac=True,
+                  ransacThresOrient=0.4,
+                  ransacThresScale=0.4).save('bestWithRansac.png')
