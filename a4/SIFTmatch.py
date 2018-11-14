@@ -174,24 +174,24 @@ def test():
 
 # Test run...
 test()
-# siftThresholds = [0.40, 0.60, 0.70, 0.75, 0.78, 0.79, 0.80]
-# for siftThreshold in siftThresholds:
-#     match('scene', 'book', siftThreshold=siftThreshold, useRansac=False).save(
-#         'results/sb_' + ("%0.2f" % siftThreshold) + '_out.png')
-#
-#
-# siftThresholds = [0.78, 0.79, 0.8]
-# ransacOrientThresholds = [math.pi / 4, math.pi / 5, math.pi / 6, math.pi / 7, math.pi / 8]
-# ransacScaleThresholds = [0.4, 0.45, 0.5, 0.55, 0.6]
-# for siftThreshold in siftThresholds:
-#     for ransacOrientThreshold in ransacOrientThresholds:
-#         for ransacScaleThreshold in ransacScaleThresholds:
-#             match('library', 'library2', siftThreshold=siftThreshold, useRansac=True,
-#                   ransacThresOrient=ransacOrientThreshold,
-#                   ransacThresScale=ransacScaleThreshold).save(
-#                 'results/ll_sift-' + ("%0.2f" % siftThreshold) +
-#                 '_orient-' + ("%0.2f" % ransacOrientThreshold) + '_scale-' +
-#                 ("%0.2f" % ransacScaleThreshold) + '_out.png')
+siftThresholds = [0.40, 0.60, 0.70, 0.75, 0.78, 0.79, 0.80]
+for siftThreshold in siftThresholds:
+    match('scene', 'book', siftThreshold=siftThreshold, useRansac=False).save(
+        'results/sb_' + ("%0.2f" % siftThreshold) + '_out.png')
+
+
+siftThresholds = [0.78, 0.79, 0.8]
+ransacOrientThresholds = [math.pi / 4, math.pi / 5, math.pi / 6, math.pi / 7, math.pi / 8]
+ransacScaleThresholds = [0.4, 0.45, 0.5, 0.55, 0.6]
+for siftThreshold in siftThresholds:
+    for ransacOrientThreshold in ransacOrientThresholds:
+        for ransacScaleThreshold in ransacScaleThresholds:
+            match('library', 'library2', siftThreshold=siftThreshold, useRansac=True,
+                  ransacThresOrient=ransacOrientThreshold,
+                  ransacThresScale=ransacScaleThreshold).save(
+                'results/ll_sift-' + ("%0.2f" % siftThreshold) +
+                '_orient-' + ("%0.2f" % ransacOrientThreshold) + '_scale-' +
+                ("%0.2f" % ransacScaleThreshold) + '_out.png')
 
 match('library', 'library2', siftThreshold=0.8, useRansac=True,
                   ransacThresOrient=0.4,
