@@ -68,8 +68,8 @@ svm_correct = np.sum(pred_labels_svm == test_labels)
 
 print("KNN Accurracy =", knn_correct / len(test_labels))
 print("SVM Accurracy =", svm_correct / len(test_labels))
-knn_cm = generate_confusion_matrix(test_labels, pred_labels_knn, test_class_labels)
-svn_cm = generate_confusion_matrix(test_labels, pred_labels_svm, test_class_labels)
+knn_cm = generate_confusion_matrix(test_labels, pred_labels_knn, test_class_labels, "KNN")
+svn_cm = generate_confusion_matrix(test_labels, pred_labels_svm, test_class_labels, "SVM")
 
 # Interpreting your performance with 100 training examples per category:
 #  accuracy  =   0 -> Your code is broken (probably not the classifier's

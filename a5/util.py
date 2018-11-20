@@ -105,7 +105,8 @@ def sample_images(ds_path: str, n_sample: int) -> Tuple[np.ndarray, np.ndarray, 
 
     # Randomly sample from the training/testing dataset
     # Depending on the purpose, we might not need to use the entire dataset
-    idx = np.random.choice(n_files, size=n_sample, replace=False)
+    # idx = np.random.choice(n_files, size=n_sample, replace=False) #FIXME
+    idx = np.random.RandomState(seed=42).choice(n_files, size=n_sample, replace=False)
     image_paths = np.asarray(files)[idx]
 
     # Get class labels
@@ -119,7 +120,10 @@ def sample_images(ds_path: str, n_sample: int) -> Tuple[np.ndarray, np.ndarray, 
     return image_paths, labels, [class_name.split('/')[2] for class_name in classes]
 
 
-def generate_confusion_matrix(y_test: np.ndarray, y_pred: np.ndarray, class_names: List[str]) -> plt:
+def generate_confusion_matrix(y_test: np.ndarray,
+                              y_pred: np.ndarray,
+                              class_names: List[str],
+                              predictor_type: str) -> plt:
     # class_names is 15x1 array of floats (one hot)
 
     # Compute confusion matrix
@@ -129,12 +133,12 @@ def generate_confusion_matrix(y_test: np.ndarray, y_pred: np.ndarray, class_name
     # Plot non-normalized confusion matrix
     plt.figure()
     plot_confusion_matrix(cnf_matrix, classes=class_names,
-                          title='Confusion matrix, without normalization')
+                          title=predictor_type + ' Confusion matrix, without normalization')
 
     # Plot normalized confusion matrix
     plt.figure()
     plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
-                          title='Normalized confusion matrix')
+                          title=predictor_type + ' Normalized confusion matrix')
 
     plt.show()
 
