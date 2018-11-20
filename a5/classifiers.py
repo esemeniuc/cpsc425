@@ -49,7 +49,7 @@ B are the learned hyperplane parameters. '''
 
 def svm_classify(train_image_feats: np.ndarray,
                  train_labels: np.ndarray,
-                 test_image_feats: np.ndarray) -> np.ndarray:
+                 test_image_feats: np.ndarray, regularizer_C: float) -> np.ndarray:
     '''
     Parameters
         ----------
@@ -71,7 +71,7 @@ def svm_classify(train_image_feats: np.ndarray,
 
     '''
 
-    neigh = svm.SVC(gamma='scale') #FIXME
+    neigh = svm.SVC(C=regularizer_C, gamma='scale')  # FIXME
     neigh.fit(train_image_feats, train_labels)
     predicted_labels = neigh.predict(test_image_feats)
     return predicted_labels
