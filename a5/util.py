@@ -3,6 +3,7 @@ import os
 import glob
 from sklearn.cluster import KMeans
 from sklearn.metrics import pairwise_distances_argmin
+from typing import TypeVar, Iterable, Tuple, Union
 
 
 def build_vocabulary(image_paths: np.ndarray, vocab_size: int) -> KMeans:
@@ -75,7 +76,7 @@ def get_bags_of_sifts(image_paths: np.ndarray, kmeans: KMeans) -> np.ndarray:
     return image_feats
 
 
-def sample_images(ds_path: str, n_sample: int):
+def sample_images(ds_path: str, n_sample: int) -> Tuple[np.ndarray, np.ndarray]:
     """ Sample images from the training/testing dataset.
 
     Parameters
