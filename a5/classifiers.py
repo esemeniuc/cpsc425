@@ -33,7 +33,7 @@ def nearest_neighbor_classify(train_image_feats: np.ndarray,
         # Reference: https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
     '''
 
-    neigh = KNeighborsClassifier(n_neighbors=3)  # FIXME
+    neigh = KNeighborsClassifier(n_neighbors=5)  # FIXME
     neigh.fit(train_image_feats, train_labels)
     predicted_labels = neigh.predict(test_image_feats)
     return predicted_labels

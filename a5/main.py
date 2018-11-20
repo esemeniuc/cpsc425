@@ -16,8 +16,8 @@ from classifiers import nearest_neighbor_classify, svm_classify
 # You can limit number of samples by using the n_sample parameter.
 
 print('Getting paths and labels for all train and test data\n')
-train_image_paths, train_labels, train_class_labels = sample_images("sift/train", n_sample=20)  # FIXME
-# train_image_paths, train_labels = sample_images("sift/train", n_sample=300)
+# train_image_paths, train_labels, train_class_labels = sample_images("sift/train", n_sample=20)  # FIXME
+train_image_paths, train_labels, train_class_labels = sample_images("sift/train", n_sample=300)
 test_image_paths, test_labels, test_class_labels = sample_images("sift/test", n_sample=100)
 
 ''' Step 1: Represent each image with the appropriate feature
@@ -28,8 +28,8 @@ test_image_paths, test_labels, test_class_labels = sample_images("sift/test", n_
 
 print('Extracting SIFT features\n')
 # TODO: You code build_vocabulary function in util.py
-kmeans = build_vocabulary(train_image_paths, vocab_size=20)  # FIXME
-# kmeans = build_vocabulary(train_image_paths, vocab_size=200)
+# kmeans = build_vocabulary(train_image_paths, vocab_size=20)  # FIXME
+kmeans = build_vocabulary(train_image_paths, vocab_size=200)
 
 # TODO: You code get_bags_of_sifts function in util.py
 print('get_bags_of_sifts()\n')
@@ -65,6 +65,8 @@ print('---Evaluation---\n')
 #   to their category name format.
 knn_correct = np.sum(pred_labels_knn == test_labels)
 svm_correct = np.sum(pred_labels_svm == test_labels)
+
+#FIXME: normalize stuff for matrix????
 
 print("KNN Accurracy =", knn_correct / len(test_labels))
 print("SVM Accurracy =", svm_correct / len(test_labels))
