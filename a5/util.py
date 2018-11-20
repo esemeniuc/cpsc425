@@ -34,9 +34,9 @@ def build_vocabulary(image_paths: np.ndarray, vocab_size: int) -> KMeans:
         descriptors = np.loadtxt(path, delimiter=',', dtype=float)
         # descriptors is n x 128
         # TODO: Randomly sample n_each features from descriptors, and store them in features
-        temp = np.random.RandomState(seed=i).permutation(descriptors)[:n_each]  # fixme
-        # temp = np.random.permutation(descriptors)[:n_each]
-        features = np.vstack((features, temp))
+        randomSetOfDescriptors = np.random.RandomState(seed=i).permutation(descriptors)[:n_each]  # fixme
+        # randomSetOfDescriptors = np.random.permutation(descriptors)[:n_each]
+        features = np.vstack((features, randomSetOfDescriptors))
 
     # TODO: perform k-means clustering to cluster sampled SIFT features into vocab_size regions.
     # You can use KMeans from sci-kit learn.
@@ -94,7 +94,7 @@ def sample_images(ds_path: str, n_sample: int) -> Tuple[np.ndarray, np.ndarray]:
     files = glob.glob(os.path.join(ds_path, "*", "*.txt"))
     n_files = len(files)
 
-    if n_sample == None:
+    if n_sample is None:
         n_sample = n_files
 
     # Randomly sample from the training/testing dataset

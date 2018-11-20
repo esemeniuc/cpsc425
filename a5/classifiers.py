@@ -1,6 +1,8 @@
 # Starter code prepared by Borna Ghotbi for computer vision
 # based on MATLAB code by James Hay
 import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import svm
 
 '''This function will predict the category for every test image by finding
 the training image with most similar features. Instead of 1 nearest
@@ -30,6 +32,10 @@ def nearest_neighbor_classify(train_image_feats: np.ndarray,
     	# You can use knn from sci-kit learn.
         # Reference: https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
     '''
+
+    neigh = KNeighborsClassifier(n_neighbors=3)  # FIXME
+    neigh.fit(train_image_feats, train_labels)
+    predicted_labels = neigh.predict(test_image_feats)
     return predicted_labels
 
 
@@ -41,7 +47,9 @@ margin, is W*X + B where '*' is the inner product or dot product and W and
 B are the learned hyperplane parameters. '''
 
 
-def svm_classify(train_image_feats, train_labels, test_image_feats):
+def svm_classify(train_image_feats: np.ndarray,
+                 train_labels: np.ndarray,
+                 test_image_feats: np.ndarray) -> np.ndarray:
     '''
     Parameters
         ----------
@@ -62,4 +70,8 @@ def svm_classify(train_image_feats, train_labels, test_image_feats):
         # Reference: https://scikit-learn.org/stable/modules/svm.html
 
     '''
+
+    neigh = svm.SVC(gamma='scale') #FIXME
+    neigh.fit(train_image_feats, train_labels)
+    predicted_labels = neigh.predict(test_image_feats)
     return predicted_labels
