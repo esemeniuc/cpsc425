@@ -2,6 +2,7 @@ import numpy as np
 import os
 import glob
 from sklearn.cluster import KMeans
+from sklearn.metrics import pairwise_distances_argmin
 
 
 def build_vocabulary(image_paths: np.ndarray, vocab_size: int) -> KMeans:
@@ -32,18 +33,20 @@ def build_vocabulary(image_paths: np.ndarray, vocab_size: int) -> KMeans:
         descriptors = np.loadtxt(path, delimiter=',', dtype=float)
         # descriptors is n x 128
         # TODO: Randomly sample n_each features from descriptors, and store them in features
-        temp = np.random.permutation(descriptors)[:n_each]
+        temp = np.random.RandomState(seed=i).permutation(descriptors)[:n_each]  # fixme
+        # temp = np.random.permutation(descriptors)[:n_each]
         features = np.vstack((features, temp))
 
     # TODO: perform k-means clustering to cluster sampled SIFT features into vocab_size regions.
     # You can use KMeans from sci-kit learn.
     # Reference: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
-    kmeans = KMeans(n_clusters=vocab_size).fit(features)
+    kmeans = KMeans(n_clusters=vocab_size, random_state=0).fit(features)  # fixme
+    # kmeans = KMeans(n_clusters=vocab_size).fit(features)
 
     return kmeans
 
 
-def get_bags_of_sifts(image_paths, kmeans):
+def get_bags_of_sifts(image_paths: np.ndarray, kmeans: KMeans) -> np.ndarray:
     """ Represent each image as bags of SIFT features histogram.
 
     Parameters
@@ -65,13 +68,14 @@ def get_bags_of_sifts(image_paths, kmeans):
         descriptors = np.loadtxt(path, delimiter=',', dtype=float)
 
         # TODO: Assign each descriptor to the closest cluster center
-
+        closest = pairwise_distances_argmin(descriptors, kmeans.cluster_centers_)
         # TODO: Build a histogram normalized by the number of descriptors
+        np.add.at(image_feats[i], closest, 1)
 
     return image_feats
 
 
-def sample_images(ds_path: str, n_sample: int) -> np.ndarray:
+def sample_images(ds_path: str, n_sample: int):
     """ Sample images from the training/testing dataset.
 
     Parameters
