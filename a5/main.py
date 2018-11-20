@@ -48,11 +48,11 @@ test_image_feats = get_bags_of_sifts(test_image_paths, kmeans)
 
 print('Using nearest neighbor classifier to predict test set categories\n')
 # TODO: YOU CODE nearest_neighbor_classify function from classifers.py
-pred_labels_knn = nearest_neighbor_classify(train_image_feats, train_labels, test_image_feats)
+pred_labels_knn = nearest_neighbor_classify(train_image_feats, train_labels, test_image_feats, 5)
 
 print('Using support vector machine to predict test set categories\n')
 # TODO: YOU CODE svm_classify function from classifers.py
-pred_labels_svm = svm_classify(train_image_feats, train_labels, test_image_feats, regularizer_C=1)
+pred_labels_svm = svm_classify(train_image_feats, train_labels, test_image_feats, regularizer_C=3)
 
 print('---Evaluation---\n')
 # Step 3: Build a confusion matrix and score the recognition system for 
@@ -65,8 +65,6 @@ print('---Evaluation---\n')
 #   to their category name format.
 knn_correct = np.sum(pred_labels_knn == test_labels)
 svm_correct = np.sum(pred_labels_svm == test_labels)
-
-#FIXME: normalize stuff for matrix????
 
 print("KNN Accurracy =", knn_correct / len(test_labels))
 print("SVM Accurracy =", svm_correct / len(test_labels))

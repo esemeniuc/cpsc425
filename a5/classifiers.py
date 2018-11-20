@@ -12,7 +12,8 @@ performance (although you need to pick a reasonable value for k). '''
 
 def nearest_neighbor_classify(train_image_feats: np.ndarray,
                               train_labels: np.ndarray,
-                              test_image_feats: np.ndarray) -> np.ndarray:
+                              test_image_feats: np.ndarray,
+                              k: int) -> np.ndarray:
     '''
     Parameters
         ----------
@@ -33,7 +34,7 @@ def nearest_neighbor_classify(train_image_feats: np.ndarray,
         # Reference: https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
     '''
 
-    neigh = KNeighborsClassifier(n_neighbors=5)  # FIXME
+    neigh = KNeighborsClassifier(n_neighbors=k)
     neigh.fit(train_image_feats, train_labels)
     predicted_labels = neigh.predict(test_image_feats)
     return predicted_labels

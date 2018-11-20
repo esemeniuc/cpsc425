@@ -119,7 +119,7 @@ def sample_images(ds_path: str, n_sample: int) -> Tuple[np.ndarray, np.ndarray, 
     return image_paths, labels, [class_name.split('/')[2] for class_name in classes]
 
 
-def generate_confusion_matrix(y_test: np.ndarray, y_pred: np.ndarray, class_names: List[str]):
+def generate_confusion_matrix(y_test: np.ndarray, y_pred: np.ndarray, class_names: List[str]) -> plt:
     # class_names is 15x1 array of floats (one hot)
 
     # Compute confusion matrix
