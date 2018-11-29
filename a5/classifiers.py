@@ -34,7 +34,7 @@ def nearest_neighbor_classify(train_image_feats: np.ndarray,
         # Reference: https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
     '''
 
-    neigh = KNeighborsClassifier(n_neighbors=k)
+    neigh = KNeighborsClassifier(n_neighbors=k, n_jobs=8)
     neigh.fit(train_image_feats, train_labels)
     predicted_labels = neigh.predict(test_image_feats)
     return predicted_labels
@@ -73,6 +73,7 @@ def svm_classify(train_image_feats: np.ndarray,
     '''
 
     neigh = svm.SVC(C=regularizer_C, gamma='scale')  # FIXME
+    # neigh = svm.SVC(C=regularizer_C, gamma='scale')  # FIXME try linear svc
     neigh.fit(train_image_feats, train_labels)
     predicted_labels = neigh.predict(test_image_feats)
     return predicted_labels

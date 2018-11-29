@@ -4,7 +4,6 @@ import glob
 import matplotlib.pyplot as plt
 import itertools
 from sklearn.cluster import KMeans
-from sklearn.metrics import pairwise_distances_argmin
 from sklearn.metrics import confusion_matrix
 from typing import TypeVar, Iterable, Tuple, Union, List
 
@@ -38,14 +37,15 @@ def build_vocabulary(image_paths: np.ndarray, vocab_size: int) -> KMeans:
         # descriptors is n x 128
         # TODO: Randomly sample n_each features from descriptors, and store them in features
         # randomSetOfDescriptors = np.random.RandomState(seed=i).permutation(descriptors)[:n_each]  # fixme
-        randomSetOfDescriptors = np.random.permutation(descriptors)[:n_each]
+        randomSelection = np.random.choice(descriptors.shape[0], min(n_each, descriptors.shape[0]), replace=False)
+        randomSetOfDescriptors = descriptors[randomSelection, :]
         features = np.vstack((features, randomSetOfDescriptors))
 
     # TODO: perform k-means clustering to cluster sampled SIFT features into vocab_size regions.
     # You can use KMeans from sci-kit learn.
     # Reference: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
     # kmeans = KMeans(n_clusters=vocab_size, random_state=0).fit(features)  # fixme
-    kmeans = KMeans(n_clusters=vocab_size).fit(features)
+    kmeans = KMeans(n_clusters=vocab_size, n_jobs=8).fit(features)
 
     return kmeans
 
@@ -70,13 +70,36 @@ def get_bags_of_sifts(image_paths: np.ndarray, kmeans: KMeans) -> np.ndarray:
     for i, path in enumerate(image_paths):
         # Load SIFT descriptors
         descriptors = np.loadtxt(path, delimiter=',', dtype=float)
-
         # TODO: Assign each descriptor to the closest cluster center
-        closest = pairwise_distances_argmin(descriptors, kmeans.cluster_centers_)
+        closest = kmeans.predict(descriptors)
+        # closest = pairwise_distances_argmin(descriptors, kmeans.cluster_centers_)
         # TODO: Build a histogram normalized by the number of descriptors
-        np.add.at(image_feats[i], closest, 1)
+        # np.add.at(image_feats[i], closest, 1)
+        np.add.at(image_feats[i], closest, 1 / descriptors.shape[0])  # divide to normalize
 
     return image_feats
+
+
+def plotHistogram(train_image_feats: np.ndarray, train_labels: np.ndarray, train_available_labels: list) -> None:
+    classHistograms = {}  # dict of category to (normalized histogram, number of histograms in that class)
+    for i, train_image_category in enumerate(train_labels):  # plot a histogram for each scene category
+        # make 15 different histograms, sum them up based on class
+        if classHistograms.get(train_available_labels[train_image_category]) is None:
+            classHistograms[train_available_labels[train_image_category]] = [train_image_feats[i], 1]
+        else:
+            np.add(classHistograms[train_available_labels[train_image_category]][0], train_image_feats[i])
+            classHistograms[train_available_labels[train_image_category]][1] += 1
+
+    # plot average histogram for each scene category
+    for category, (histogram, count) in classHistograms.items():
+        # get avg by averaging histograms for each training image
+        print(category, count)
+        np.divide(histogram, count)
+        plt.clf()
+        plt.bar(np.arange(train_image_feats.shape[1]), histogram)  # arguments are passed to np.histogram
+        plt.title("%s Histogram" % category)
+        # plt.show()
+        plt.savefig('histogramOutput/' + category + '.png')
 
 
 def sample_images(ds_path: str, n_sample: int) -> Tuple[np.ndarray, np.ndarray, List[str]]:
@@ -117,7 +140,7 @@ def sample_images(ds_path: str, n_sample: int) -> Tuple[np.ndarray, np.ndarray, 
         folder, fn = os.path.split(path)
         labels[i] = np.argwhere(np.core.defchararray.equal(classes, folder))[0, 0]
 
-    return image_paths, labels, [class_name.split('/')[2] for class_name in classes]
+    return image_paths, labels.astype(int), [class_name.split('/')[2] for class_name in classes]
 
 
 def generate_confusion_matrix(y_test: np.ndarray,
@@ -125,22 +148,26 @@ def generate_confusion_matrix(y_test: np.ndarray,
                               class_names: List[str],
                               predictor_type: str) -> plt:
     # class_names is 15x1 array of floats (one hot)
-
+    plt.clf()
     # Compute confusion matrix
     cnf_matrix = confusion_matrix(y_test, y_pred)
     np.set_printoptions(precision=2)
 
     # Plot non-normalized confusion matrix
     plt.figure()
+    title = predictor_type + ' Confusion matrix, without normalization'
     plot_confusion_matrix(cnf_matrix, classes=class_names,
-                          title=predictor_type + ' Confusion matrix, without normalization')
+                          title=title)
+    plt.savefig("histogramOutput/" + title + ".png")
 
     # Plot normalized confusion matrix
     plt.figure()
+    title = predictor_type + ' Normalized confusion matrix'
     plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
-                          title=predictor_type + ' Normalized confusion matrix')
+                          title=title)
 
-    plt.show()
+    # plt.show()
+    plt.savefig("histogramOutput/" + title + ".png")
 
 
 def plot_confusion_matrix(cm, classes,
