@@ -26,7 +26,7 @@ def build_vocabulary(image_paths: np.ndarray, vocab_size: int) -> KMeans:
 
     # Since want to sample tens of thousands of SIFT descriptors from different images, we
     # calculate the number of SIFT descriptors we need to sample from each image.
-    n_each = int(np.ceil(10000 / n_image))  # You can adjust 10000 if more is desired
+    n_each = int(np.ceil(20000 / n_image))  # You can adjust 10000 if more is desired
 
     # Initialize an array of features, which will store the sampled descriptors
     features = np.zeros((0, 128))

@@ -2,7 +2,7 @@
 # based on MATLAB code by James Hay
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn import svm
+from sklearn import svm, multiclass
 
 '''This function will predict the category for every test image by finding
 the training image with most similar features. Instead of 1 nearest
@@ -34,10 +34,35 @@ def nearest_neighbor_classify(train_image_feats: np.ndarray,
         # Reference: https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
     '''
 
+    print('using k=', k)
     neigh = KNeighborsClassifier(n_neighbors=k, n_jobs=8)
     neigh.fit(train_image_feats, train_labels)
     predicted_labels = neigh.predict(test_image_feats)
     return predicted_labels
+
+
+def knn_score(train_image_feats: np.ndarray,
+              train_labels: np.ndarray) -> int:
+    knn_correct = [KNeighborsClassifier(n_neighbors=k, n_jobs=8)
+                       .fit(train_image_feats, train_labels)
+                       .score(train_image_feats, train_labels)
+                   for k in range(1, min(40, train_image_feats.shape[0]), 2)]
+    print("KNN results:", knn_correct)
+    return np.argmax(knn_correct) + 1  # off by 1
+
+
+def svm_score(train_image_feats: np.ndarray,
+              train_labels: np.ndarray) -> int:
+    svm_correct = []
+    classifiers = [multiclass.OneVsRestClassifier(svm.SVC(kernel='linear', C=c)) for c in range(1, 20)]
+    # classifiers += [svm.LinearSVC(C=c) for c in range(1, 20)]
+    # classifiers += [svm.SVC(C=c) for c in range(1, 20)]
+
+    for neigh in classifiers:
+        svm_correct.append(neigh.fit(train_image_feats, train_labels).score(train_image_feats, train_labels))
+
+    print("SVM results:", svm_correct)
+    return np.argmax(svm_correct) + 1  # off by 1
 
 
 '''This function will train a linear SVM for every category (i.e. one vs all)
@@ -72,7 +97,8 @@ def svm_classify(train_image_feats: np.ndarray,
 
     '''
 
-    neigh = svm.SVC(C=regularizer_C, gamma='scale')  # FIXME
+    neigh = multiclass.OneVsRestClassifier(svm.SVC(kernel='linear', C=regularizer_C))  # FIXME
+    # neigh = svm.LinearSVC(C=regularizer_C, gamma='scale')  # FIXME
     # neigh = svm.SVC(C=regularizer_C, gamma='scale')  # FIXME try linear svc
     neigh.fit(train_image_feats, train_labels)
     predicted_labels = neigh.predict(test_image_feats)
