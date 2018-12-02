@@ -1,0 +1,135 @@
+\documentclass[]{article}
+\usepackage{graphicx}
+\usepackage{pgffor}
+
+%opening
+\title{CPSC425 A5}
+\author{Eric Semeniuc - 54383161}
+
+\begin{document}
+
+\maketitle
+
+
+\textbf{Q5:}
+\foreach \x in {Office, InsideCity, LivingRoom, Forest, Kitchen, Store, Coast, OpenCountry, Bedroom, Suburb, Street, Highway, Mountain, Industrial, TallBuilding}{
+	\includegraphics[width=0.9\linewidth]{histogramOutput/\x.png}\\
+	\label{fig:Sift threshold = \x}
+}
+It is useful to see the raw data. Plot average histgoram for every scene category. Average histograms can be obtained by simply averaging histograms for each training image. You should end up visualizing 15 average histograms which you should also submit as part of the writeup. Write a few sentences to describe how different are the histograms from different classes. Which classes you may believe to be hardest to separate (i.e., which you would be expect to be most confused) looking at these histograms:\\\\
+
+The TallBuilding, Highway, Coast, InsideCity categories do well as there is long (often parallel) straight lines that help make the scene distinguishable. Scenes that do not have obvious defining features would be difficult to identify in general. If we look at the histogram and see sharp spikes, then in general the data has common defining features that make it identifiable. If the data has a shallow range, it does not have a very distinct signature.
+The hardest to separate would be where the variance in the histogram is fairly small, for example, "Store", "LivingRoom", "Suburb".
+\pagebreak
+ 
+\textbf{Q6:}\\
+KNN Accurracy = 0.335\\
+SVM Accurracy = 0.465\\
+
+\textbf{KNN Confusion Matrix}\\
+\includegraphics[width=0.9\linewidth]{histogramOutput/{KNN Normalized confusion matrix}.png}\\\\
+\textbf{SVM Confusion Matrix}\\
+\includegraphics[width=0.9\linewidth]{histogramOutput/{SVM Normalized confusion matrix}.png}
+
+\pagebreak
+
+\begin{verbatim}
+Confusion matrix, without normalization
+[[ 2  0  4  0  0  2  0  0  1  2  0  0  0  0  0]
+[ 2  9  0  0  0  2  0  0  0  2  0  0  0  0  0]
+[ 0  2  1  0  0  7  0  0  0  2  0  0  0  0  0]
+[ 0  0  0 18  0  1  0  1  0  0  0  0  0  0  0]
+[ 2  0  3  0  0  3  0  0  1  1  1  0  0  1  0]
+[ 0  0  0  0  0  5  0  0  0  0  0  0  0  1  0]
+[ 0  1  1  2  0  2  4  0  0  3  0  0  1  1  0]
+[ 0  1  0  4  0  2  1  2  0  4  1  0  1  0  0]
+[ 2  0  3  0  0  5  0  0  2  0  0  0  0  0  0]
+[ 0  0  0  0  0  0  0  1  0 11  0  0  0  0  0]
+[ 1  1  0  0  0 11  0  1  0  0  2  0  0  0  1]
+[ 0  1  0  0  1  0  0  0  0  2  0  1  0  0  1]
+[ 0  0  0  6  0  2  0  0  0  5  1  0  6  0  0]
+[ 0  1  3  1  0  4  0  0  0  1  3  0  0  1  0]
+[ 0  5  0  1  0  2  0  0  0  1  0  0  0  0  3]]
+Normalized confusion matrix
+[[0.18 0.   0.36 0.   0.   0.18 0.   0.   0.09 0.18 0.   0.   0.   0.
+0.  ]
+[0.13 0.6  0.   0.   0.   0.13 0.   0.   0.   0.13 0.   0.   0.   0.
+0.  ]
+[0.   0.17 0.08 0.   0.   0.58 0.   0.   0.   0.17 0.   0.   0.   0.
+0.  ]
+[0.   0.   0.   0.9  0.   0.05 0.   0.05 0.   0.   0.   0.   0.   0.
+0.  ]
+[0.17 0.   0.25 0.   0.   0.25 0.   0.   0.08 0.08 0.08 0.   0.   0.08
+0.  ]
+[0.   0.   0.   0.   0.   0.83 0.   0.   0.   0.   0.   0.   0.   0.17
+0.  ]
+[0.   0.07 0.07 0.13 0.   0.13 0.27 0.   0.   0.2  0.   0.   0.07 0.07
+0.  ]
+[0.   0.06 0.   0.25 0.   0.12 0.06 0.12 0.   0.25 0.06 0.   0.06 0.
+0.  ]
+[0.17 0.   0.25 0.   0.   0.42 0.   0.   0.17 0.   0.   0.   0.   0.
+0.  ]
+[0.   0.   0.   0.   0.   0.   0.   0.08 0.   0.92 0.   0.   0.   0.
+0.  ]
+[0.06 0.06 0.   0.   0.   0.65 0.   0.06 0.   0.   0.12 0.   0.   0.
+0.06]
+[0.   0.17 0.   0.   0.17 0.   0.   0.   0.   0.33 0.   0.17 0.   0.
+0.17]
+[0.   0.   0.   0.3  0.   0.1  0.   0.   0.   0.25 0.05 0.   0.3  0.
+0.  ]
+[0.   0.07 0.21 0.07 0.   0.29 0.   0.   0.   0.07 0.21 0.   0.   0.07
+0.  ]
+[0.   0.42 0.   0.08 0.   0.17 0.   0.   0.   0.08 0.   0.   0.   0.
+0.25]]
+Confusion matrix, without normalization
+[[ 5  1  1  0  2  0  0  0  1  1  0  0  0  0  0]
+[ 2  5  1  1  0  1  0  0  1  1  0  1  0  0  2]
+[ 1  2  3  0  2  0  0  0  2  0  0  0  0  1  1]
+[ 0  0  0 20  0  0  0  0  0  0  0  0  0  0  0]
+[ 2  0  2  0  2  3  0  0  2  0  0  1  0  0  0]
+[ 0  2  0  0  0  3  0  0  0  0  0  0  1  0  0]
+[ 0  0  0  3  0  0  9  0  0  0  0  2  1  0  0]
+[ 0  0  0  3  0  0  2  4  0  2  1  3  1  0  0]
+[ 1  1  1  0  0  2  0  0  4  0  2  1  0  0  0]
+[ 0  0  1  1  0  0  0  0  0  7  0  1  1  0  1]
+[ 0  1  0  0  0  1  0  0  2  0  9  1  1  2  0]
+[ 0  0  0  0  0  0  0  1  0  1  0  3  0  0  1]
+[ 0  0  0  5  0  0  4  0  0  0  0  1 10  0  0]
+[ 1  1  2  0  1  1  1  0  1  0  6  0  0  0  0]
+[ 0  1  0  0  0  0  0  0  1  0  0  1  0  0  9]]
+Normalized confusion matrix
+[[0.45 0.09 0.09 0.   0.18 0.   0.   0.   0.09 0.09 0.   0.   0.   0.
+0.  ]
+[0.13 0.33 0.07 0.07 0.   0.07 0.   0.   0.07 0.07 0.   0.07 0.   0.
+0.13]
+[0.08 0.17 0.25 0.   0.17 0.   0.   0.   0.17 0.   0.   0.   0.   0.08
+0.08]
+[0.   0.   0.   1.   0.   0.   0.   0.   0.   0.   0.   0.   0.   0.
+0.  ]
+[0.17 0.   0.17 0.   0.17 0.25 0.   0.   0.17 0.   0.   0.08 0.   0.
+0.  ]
+[0.   0.33 0.   0.   0.   0.5  0.   0.   0.   0.   0.   0.   0.17 0.
+0.  ]
+[0.   0.   0.   0.2  0.   0.   0.6  0.   0.   0.   0.   0.13 0.07 0.
+0.  ]
+[0.   0.   0.   0.19 0.   0.   0.12 0.25 0.   0.12 0.06 0.19 0.06 0.
+0.  ]
+[0.08 0.08 0.08 0.   0.   0.17 0.   0.   0.33 0.   0.17 0.08 0.   0.
+0.  ]
+[0.   0.   0.08 0.08 0.   0.   0.   0.   0.   0.58 0.   0.08 0.08 0.
+0.08]
+[0.   0.06 0.   0.   0.   0.06 0.   0.   0.12 0.   0.53 0.06 0.06 0.12
+0.  ]
+[0.   0.   0.   0.   0.   0.   0.   0.17 0.   0.17 0.   0.5  0.   0.
+0.17]
+[0.   0.   0.   0.25 0.   0.   0.2  0.   0.   0.   0.   0.05 0.5  0.
+0.  ]
+[0.07 0.07 0.14 0.   0.07 0.07 0.07 0.   0.07 0.   0.43 0.   0.   0.
+0.  ]
+[0.   0.08 0.   0.   0.   0.   0.   0.   0.08 0.   0.   0.08 0.   0.
+0.75]]
+\end{verbatim}
+
+
+
+\end{document}
