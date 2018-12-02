@@ -42,24 +42,24 @@ def nearest_neighbor_classify(train_image_feats: np.ndarray,
 
 
 def knn_score(train_image_feats: np.ndarray,
-              train_labels: np.ndarray) -> int:
+              train_labels: np.ndarray, test_image_feats, test_labels) -> int:
     knn_correct = [KNeighborsClassifier(n_neighbors=k, n_jobs=8)
                        .fit(train_image_feats, train_labels)
-                       .score(train_image_feats, train_labels)
+                       .score(test_image_feats, test_labels)
                    for k in range(1, min(40, train_image_feats.shape[0]), 2)]
     print("KNN results:", knn_correct)
     return np.argmax(knn_correct) + 1  # off by 1
 
 
 def svm_score(train_image_feats: np.ndarray,
-              train_labels: np.ndarray) -> int:
+              train_labels: np.ndarray, test_image_feats, test_labels) -> int:
     svm_correct = []
     classifiers = [multiclass.OneVsRestClassifier(svm.SVC(kernel='linear', C=c)) for c in range(1, 20)]
     # classifiers += [svm.LinearSVC(C=c) for c in range(1, 20)]
     # classifiers += [svm.SVC(C=c) for c in range(1, 20)]
 
     for neigh in classifiers:
-        svm_correct.append(neigh.fit(train_image_feats, train_labels).score(train_image_feats, train_labels))
+        svm_correct.append(neigh.fit(train_image_feats, train_labels).score(test_image_feats, test_labels))
 
     print("SVM results:", svm_correct)
     return np.argmax(svm_correct) + 1  # off by 1

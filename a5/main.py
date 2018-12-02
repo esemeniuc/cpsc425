@@ -18,8 +18,8 @@ from classifiers import nearest_neighbor_classify, svm_classify, knn_score, svm_
 
 print('Getting paths and labels for all train and test data\n')
 # train_image_paths, train_labels, train_available_labels = sample_images("sift/train", n_sample=13)  # FIXME
-train_image_paths, train_labels, train_available_labels = sample_images("sift/train", n_sample=500)
-test_image_paths, test_labels, test_available_labels = sample_images("sift/test", n_sample=100)
+train_image_paths, train_labels, train_available_labels = sample_images("sift/train", n_sample=800)
+test_image_paths, test_labels, test_available_labels = sample_images("sift/test", n_sample=200)
 
 ''' Step 1: Represent each image with the appropriate feature
  Each function to construct features should return an N x d matrix, where
@@ -32,7 +32,7 @@ print('build_vocabulary()')
 
 start = time.time()
 # kmeans = build_vocabulary(train_image_paths, vocab_size=20)  # FIXME
-kmeans = build_vocabulary(train_image_paths, vocab_size=400)
+kmeans = build_vocabulary(train_image_paths, vocab_size=200)
 end = time.time()
 print('build_vocabulary time:', end - start)
 
@@ -58,16 +58,16 @@ plotHistogram(train_image_feats, train_labels, train_available_labels)
 
 print('Using nearest neighbor classifier to predict test set categories\n')
 # TODO: YOU CODE nearest_neighbor_classify function from classifers.py
-k_param = knn_score(train_image_feats, train_labels)
-# k_param = 7
-print('K param',k_param)
+# k_param = knn_score(train_image_feats, train_labels, test_image_feats, test_labels)
+k_param =6
+print('K param', k_param)
 pred_labels_knn = nearest_neighbor_classify(train_image_feats, train_labels, test_image_feats, k_param)
 
 print('Using support vector machine to predict test set categories\n')
 # TODO: YOU CODE svm_classify function from classifers.py
-svm_param = svm_score(train_image_feats, train_labels)
-# svm_param = 5
-print('svm param',svm_param)
+# svm_param = svm_score(train_image_feats, train_labels, test_image_feats, test_labels)
+svm_param = 5
+print('svm param', svm_param)
 pred_labels_svm = svm_classify(train_image_feats, train_labels, test_image_feats, svm_param)
 
 print('---Evaluation---\n')

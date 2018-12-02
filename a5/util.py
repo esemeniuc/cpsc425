@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import numpy as np
 import os
 import glob
@@ -26,7 +28,7 @@ def build_vocabulary(image_paths: np.ndarray, vocab_size: int) -> KMeans:
 
     # Since want to sample tens of thousands of SIFT descriptors from different images, we
     # calculate the number of SIFT descriptors we need to sample from each image.
-    n_each = int(np.ceil(20000 / n_image))  # You can adjust 10000 if more is desired
+    n_each = int(np.ceil(10000 / n_image))  # You can adjust 10000 if more is desired
 
     # Initialize an array of features, which will store the sampled descriptors
     features = np.zeros((0, 128))
@@ -72,31 +74,32 @@ def get_bags_of_sifts(image_paths: np.ndarray, kmeans: KMeans) -> np.ndarray:
         descriptors = np.loadtxt(path, delimiter=',', dtype=float)
         # TODO: Assign each descriptor to the closest cluster center
         closest = kmeans.predict(descriptors)
-        # closest = pairwise_distances_argmin(descriptors, kmeans.cluster_centers_)
         # TODO: Build a histogram normalized by the number of descriptors
-        # np.add.at(image_feats[i], closest, 1)
         np.add.at(image_feats[i], closest, 1 / descriptors.shape[0])  # divide to normalize
 
     return image_feats
 
 
+# train_image_feats: a
+# train_labels: the label that were predicted
+# train_available_labels: lookup table for index to english label
 def plotHistogram(train_image_feats: np.ndarray, train_labels: np.ndarray, train_available_labels: list) -> None:
-    classHistograms = {}  # dict of category to (normalized histogram, number of histograms in that class)
-    for i, train_image_category in enumerate(train_labels):  # plot a histogram for each scene category
+    classHistograms = {}  # category to (summed histogram, # of histograms in that class)
+    for i, train_label in enumerate(train_labels):  # plot a histogram for each scene category
         # make 15 different histograms, sum them up based on class
-        if classHistograms.get(train_available_labels[train_image_category]) is None:
-            classHistograms[train_available_labels[train_image_category]] = [train_image_feats[i], 1]
-        else:
-            np.add(classHistograms[train_available_labels[train_image_category]][0], train_image_feats[i])
-            classHistograms[train_available_labels[train_image_category]][1] += 1
+        category_label = train_available_labels[train_label]
+        prevVal = classHistograms.get(category_label, (np.zeros((1, train_image_feats.shape[1])), 0))
+        classHistograms[category_label] = (np.add(prevVal[0], train_image_feats[i]), prevVal[1] + 1)
+
+    # print(classHistograms)
 
     # plot average histogram for each scene category
-    for category, (histogram, count) in classHistograms.items():
+    for category, (summedHistogram, count) in classHistograms.items():
         # get avg by averaging histograms for each training image
         print(category, count)
-        np.divide(histogram, count)
+        avgHistogram = np.divide(summedHistogram, count)
         plt.clf()
-        plt.bar(np.arange(train_image_feats.shape[1]), histogram)  # arguments are passed to np.histogram
+        plt.bar(np.arange(train_image_feats.shape[1]), avgHistogram[0])  # arguments are passed to np.histogram
         plt.title("%s Histogram" % category)
         # plt.show()
         plt.savefig('histogramOutput/' + category + '.png')
@@ -190,7 +193,7 @@ def plot_confusion_matrix(cm, classes,
     plt.title(title)
     plt.colorbar()
     tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
+    plt.xticks(tick_marks, classes, rotation=90)
     plt.yticks(tick_marks, classes)
 
     fmt = '.2f' if normalize else 'd'
